@@ -1,140 +1,190 @@
 /*
  * AltSchool Assignment - Part B
- * LeetCode-Style Challenges
- *
- * Topics:
- * - Object Literals
- * - Object Cloning
- * - Property Descriptors
- * - this Binding
- * - call()
- * - bind()
- * - Deep Cloning
- */
+ * LeetCode-Style Challenges */ 
+ 
+ 
+// Answer to Problem 1
+ 
+ function deepEqual(objA, objB) {
+  if (objA === objB) return true
 
-// Challenge 1: Object Literal & this
-
-const user = {
-  name: "Tomiwa",
-
-  greet() {
-    return `Hello, my name is ${this.name}.`;
+  if (
+    objA === null ||
+    objB === null ||
+    typeof objA !== "object" ||
+    typeof objB !== "object"
+  ) {
+    return false
   }
-};
 
-console.log("Challenge 1:");
-console.log(user.greet());
+  const keysA = Object.keys(objA);
+  const keysB = Object.keys(objB);
 
+  if (keysA.length !== keysB.length) return false
 
-// Challenge 2: Cloning an Object
+  for (const key of keysA) {
+    if (!Object.hasOwn(objB, key)) return false
 
-const clonedUser = { ...user };
+    if (!deepEqual(objA[key], objB[key])) return false
+  }
 
-clonedUser.name = "Blessing";
-
-console.log("\nChallenge 2:");
-console.log("Original name:", user.name);
-console.log("Cloned name:", clonedUser.name);
-
-
-// Challenge 3: Property Descriptors
-
-const account = {};
-
-Object.defineProperty(account, "balance", {
-  value: 5000,
-  writable: false,
-  enumerable: false,
-  configurable: false
-});
-
-console.log("\nChallenge 3:");
-console.log("Initial balance:", account.balance);
-
-account.balance = 10000;
-
-console.log("Balance after attempted change:", account.balance);
-console.log("Account keys:", Object.keys(account));
-
-
-// Challenge 4: Using call() to Change this
-
-const person1 = {
-  name: "Tomiwa"
-};
-
-const person2 = {
-  name: "Sarah"
-};
-
-function introduce() {
-  return `My name is ${this.name}.`;
+  return true
 }
 
-console.log("\nChallenge 4:");
-console.log(introduce.call(person2));
+console.log(deepEqual( {a: 1, b: { c: 2} } , {a: 1, b: { c: 2} }))
+console.log(deepEqual( {a: 1, b: { c: 2} } , {a: 1, b: { c: 3} }))
+console.log(deepEqual({a:1}, {a:1, b:2 } ) )
 
 
-// Challenge 5: Using bind()
 
-function greetUser() {
-  return `Hello, ${this.name}!`;
+// Answer to Problem 2 
+
+
+function diffObjects(oldObj, newObj) {
+  const added = {}
+  const removed = {}
+  const changed = {}
+
+  for (const key of Object.keys(newObj)) {
+    if (!Object.hasOwn(oldObj, key)) {
+      added[key] = newObj[key];
+    } else if (oldObj[key] !== newObj[key]) {
+      changed[key] = {
+        from: oldObj[key],
+        to: newObj[key]
+      }
+    }
+  }
+
+  for (const key of Object.keys(oldObj)) {
+    if (!Object.hasOwn(newObj, key)) {
+      removed[key] = oldObj[key]
+    }
+  }
+
+  return { added, removed, changed }
 }
 
-const boundGreet = greetUser.bind(user);
-
-console.log("\nChallenge 5:");
-console.log(boundGreet());
-
-
-// Challenge 6: Deep Cloning
-
-const originalUser = {
-  name: "Tomiwa",
-  address: {
-    city: "Ibadan"
-  }
-};
-
-const deepClonedUser = structuredClone(originalUser);
-
-deepClonedUser.address.city = "Lagos";
-
-console.log("\nChallenge 6:");
-console.log("Original city:", originalUser.address.city);
-console.log("Cloned city:", deepClonedUser.address.city);
-
-
-// Challenge 7: Combining Object Literals, this, call(), and Property Descriptors
-
-const person = {
-  name: "Tomiwa",
-
-  greet() {
-    return `Hello, ${this.name}.`;
-  }
-};
-
-Object.defineProperty(person, "id", {
-  value: 101,
-  writable: false,
-  enumerable: false,
-  configurable: false
-});
-
-const anotherPerson = {
-  name: "Sarah"
-};
-
-console.log("\nChallenge 7:");
-console.log("Person greeting:", person.greet());
-
-console.log(
-  "Another person greeting:",
-  person.greet.call(anotherPerson)
+console.log(JSON.stringify(
+  diffObjects(
+    {
+      name: "Setemi",
+      role: "Engineer",
+      country: "Jamaica"
+    },
+    {
+      name: "Setemi",
+      role: "Senior Engineer",
+      city: "Kingston"
+    }
+  ))
 );
 
-person.id = 202;
 
-console.log("Person ID:", person.id);
-console.log("Enumerable properties:", Object.keys(person));
+// Answer to Problem 3 
+
+
+
+function deepFreeze(obj) {
+  if (
+    obj === null ||
+    typeof obj !== "object" ||
+    Object.isFrozen(obj)
+  ) {
+    return obj
+  }
+
+  Object.freeze(obj)
+
+  for (const value of Object.values(obj)) {
+    deepFreeze(value)
+  }
+
+  return obj
+}
+
+const config = deepFreeze({
+  api: {
+    baseUrl: "https://x.com",
+    retries: 3
+  },
+  debug: false
+});
+
+config.api.baseUrl = "https://changed.com"
+config.debug = true
+
+console.log(config.api.baseUrl, config.debug)
+console.log(Object.isFrozen(config.api))
+
+
+
+// Answer to Problem 4 
+
+function createCounter() {
+  let count = 0
+
+  return {
+    increment() {
+      count++
+    },
+
+    decrement() {
+      count--
+    },
+
+    get value() {
+      return count
+    }
+  }
+}
+
+const counter = createCounter()
+
+counter.increment()
+counter.increment()
+counter.decrement()
+
+console.log(counter.value)
+console.log(counter.count)
+
+
+
+
+// Answer to Problem 5 
+
+function validateSchema(obj, schema) {
+  const errors = []
+
+  for (const [key, expectedType] of Object.entries(schema)) {
+    if (!Object.hasOwn(obj, key)) {
+      errors.push(`${key}: missing property`);
+    } else if (typeof obj[key] !== expectedType) {
+      errors.push(
+        `${key}: expected ${expectedType}, got ${typeof obj[key]}`
+      )
+    }
+  }
+
+  return errors
+}
+
+const schema = {
+  name: "string",
+  age: "number",
+  isAdmin: "boolean"
+}
+
+console.log(
+  validateSchema(
+    { name: "Ada", age: 21, isAdmin: false },
+    schema
+  )
+)
+
+console.log(
+  validateSchema(
+    { name: "Ada", age: "21" },
+    schema
+  )
+)
